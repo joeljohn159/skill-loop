@@ -22,7 +22,8 @@ a decision you want captured.
      ```bash
      "${CLAUDE_PLUGIN_ROOT}/bin/reflect.sh" --now
      ```
-2. Read back `${HOME}/.skill-loop/candidates.md` and report what was
+2. Read back this project's `candidates.md` — its folder is the `STATE_DIR`
+   printed by `"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"` — report what was
    staged or reinforced, and whether anything is now ready for
    `/skill-loop:promote`.
 3. If nothing was captured and no lesson was given, the pre-scan exits with zero

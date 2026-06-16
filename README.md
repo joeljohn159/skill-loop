@@ -7,7 +7,7 @@
 **Learn a codebase once — then get a little better on every session, automatically.**
 Personal to you, never pushed to a repo, and free on the sessions where nothing happens.
 
-![version](https://img.shields.io/badge/version-0.2.0-7a2e2e?style=flat-square)
+![version](https://img.shields.io/badge/version-0.3.0-7a2e2e?style=flat-square)
 ![license](https://img.shields.io/badge/license-MIT-2ea043?style=flat-square)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8957e5?style=flat-square)
 ![idle cost](https://img.shields.io/badge/idle%20cost-0%20tokens-2ea043?style=flat-square)
@@ -32,7 +32,7 @@ Personal to you, never pushed to a repo, and free on the sessions where nothing 
 - 🧠 **Learns your conventions** — naming, layering, testing, error-handling, domain patterns.
 - ✂️ **Hard split** — anything a linter/formatter can enforce becomes config; only *judgment* rules become skills.
 - 🪶 **Stays cheap** — one gated model call per session, skipped entirely when there's no signal.
-- 👤 **Personal** — your learned skills live in *your* home dir and apply across all your projects. Teammates are never affected; nothing is committed or pushed.
+- 👤 **Personal & per-project** — each repo's learned skills live in *your* home dir, scoped to that project. Teammates are never affected; nothing is committed or pushed.
 - ⏪ **Always reversible** — skills are plain files you can read, edit, or delete; promotion keeps a backup.
 
 ## 🚀 Quickstart
@@ -56,7 +56,7 @@ flowchart LR
     R -->|no| Z[✅ exit · 0 tokens]:::free
     R -->|yes| S[📝 stage candidate]:::auto
     S -->|recurs ≥ 2| P([⭐ promote]):::cmd
-    P --> K[("👤 personal skill<br/>~/.claude/skills")]:::skill
+    P --> K[("👤 personal skill<br/>~/.claude/skills · per-project")]:::skill
     K -.->|auto-applies next time| W
 
     classDef cmd   fill:#7a2e2e,stroke:#7a2e2e,color:#fff
@@ -99,11 +99,12 @@ flowchart LR
 ## 👤 Personal by design
 
 > [!IMPORTANT]
-> Everything skill-loop learns is **yours** and **never touches a repo**.
-> - **Skills** → `~/.claude/skills/sl-*` — apply across *all* your projects.
-> - **Learning state** → `~/.skill-loop/` — signals, candidates, logs, config.
+> Everything skill-loop learns is **yours**, **per-project**, and **never touches a repo**.
+> - **Skills** → `~/.claude/skills/sl-<project>-*` — scoped with `paths:` so each repo's rules only activate in that repo (no cross-project bleed).
+> - **Learning state** → `~/.skill-loop/projects/<project>/` — signals, candidates, logs (one bucket per repo).
+> - **Global prefs** → `~/.skill-loop/config` — your model choices + thresholds.
 >
-> Teammates are unaffected; nothing is committed or pushed. The one thing `bootstrap` may add to a repo is a standard formatter config (e.g. `.prettierrc`) — shared team infra, **not** a skill.
+> Teammates are unaffected; nothing is committed or pushed. Want one shared set across all projects instead? Set `scope=global` in the config. (The one thing `bootstrap` may add to a repo is a standard formatter config like `.prettierrc` — shared team infra, **not** a skill.)
 
 ## 💸 Token discipline
 
@@ -126,7 +127,7 @@ Run `/skill-loop:configure` (bootstrap also asks on first run). `reflect` is the
 ## 🛡️ Safety
 
 - ✅ **Never auto-promotes** — reflection only *stages* candidates; skills change only when you run `/skill-loop:promote`.
-- ↩️ **Revertable** — promotion backs up the prior skill to `~/.skill-loop/skill-history/`; undo = restore or delete the file.
+- ↩️ **Revertable** — promotion backs up the prior skill under `~/.skill-loop/projects/<project>/skill-history/`; undo = restore or delete the file.
 - 🔒 **Never blocks you** — every hook exits cleanly and degrades gracefully if `jq` / `claude` / a formatter is missing.
 - 🧯 **Off switches** — `claude plugin disable skill-loop`, or `reflect=off` / `capture=off` / `enforce=off` in `~/.skill-loop/config`, or delete any `sl-*` skill.
 

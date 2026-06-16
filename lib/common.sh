@@ -25,15 +25,38 @@ fi
 # in the right cwd — NOT for storing anything).
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-# skill-loop is PERSONAL by design: everything it learns lives in the user's HOME
-# and is never written into any repo. Skills are global user-scope skills (they
-# auto-load across all of that user's projects); learning state is one personal store.
-STATE_DIR="${HOME}/.skill-loop"
-SKILLS_DIR="${HOME}/.claude/skills"          # global user-scope skills (auto-discovered everywhere)
+# skill-loop is PERSONAL and (by default) PER-PROJECT. Everything lives in the
+# user's HOME, never in a repo, and is partitioned by project so one repo's rules
+# never bleed into another. Skills are stored flat under ~/.claude/skills with a
+# project-keyed name and a `paths:` frontmatter scoping activation to that repo.
+# Set `scope=global` in ~/.skill-loop/config to share one set across all projects.
+SL_ROOT="${HOME}/.skill-loop"
+CONFIG="$SL_ROOT/config"                     # GLOBAL personal prefs (models, scope, promote_min)
+SKILLS_DIR="${HOME}/.claude/skills"          # flat, user-scope (Claude discovers one level deep)
+
+# Stable, filesystem-safe per-project key: <basename>-<8-char path hash>.
+_sl_hash() {
+  if [ -n "$SL_SHASUM" ]; then printf '%s' "$1" | "$SL_SHASUM" 2>/dev/null | cut -c1-8
+  else printf '%s' "$1" | cksum 2>/dev/null | tr -d ' ' | cut -c1-8; fi
+}
+_sl_base="$(basename "$PROJECT_DIR")"
+PROJECT_KEY="$(printf '%s' "$_sl_base" | tr -c 'A-Za-z0-9_.-' '-')-$(_sl_hash "$PROJECT_DIR")"
+
+SL_SCOPE="$(grep -E '^scope=' "$CONFIG" 2>/dev/null | head -1 | cut -d= -f2-)"
+SL_SCOPE="${SL_SCOPE:-project}"
+if [ "$SL_SCOPE" = "global" ]; then
+  STATE_DIR="$SL_ROOT"
+  SL_SKILL_PREFIX="sl-"
+  SL_SKILL_PATHS=""                          # no path scoping — applies everywhere
+else
+  STATE_DIR="$SL_ROOT/projects/$PROJECT_KEY" # per-project state, all under HOME
+  SL_SKILL_PREFIX="sl-${PROJECT_KEY}-"
+  SL_SKILL_PATHS="${PROJECT_DIR}/**"         # skills activate only inside this repo
+fi
+
 QUEUE="$STATE_DIR/queue.jsonl"               # raw captured signals (append-only)
 CANDIDATES="$STATE_DIR/candidates.md"        # staged rules awaiting promotion
 WROTE="$STATE_DIR/wrote.jsonl"               # ledger of files Claude wrote (for correction detection)
-CONFIG="$STATE_DIR/config"                   # key=value: formatters, lint cmds, stack, thresholds
 LOG="$STATE_DIR/skill-loop.log"              # raw/verbose debug log
 ACTIVITY="$STATE_DIR/activity.log"           # clean, human-readable narrative (for the /logs viewer)
 SNAP_DIR="$STATE_DIR/snap"                   # snapshots of what Claude wrote (for correction diffs)

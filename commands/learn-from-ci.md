@@ -17,24 +17,26 @@ Accepted input (any one):
 - An optional git range for the fix diff: `$2` (e.g. `main...HEAD`).
 
 ## Steps
+0. **Resolve this project's state dir:** run `"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"`
+   and use its `STATE_DIR` for the `<STATE_DIR>` paths below.
 1. **Get the log.**
    - If `$1` is an existing file, use it.
    - Otherwise write the log the user pasted into this conversation to
-     `${HOME}/.skill-loop/ci-fail.log`.
+     `<STATE_DIR>/ci-fail.log`.
    - If no log is available, ask the user to paste it, then stop.
 2. **Get the fix diff from LOCAL git** (no remote calls):
    - If `$2` is given: `git -C "${CLAUDE_PROJECT_DIR}" diff $2`
    - Else if the working tree has uncommitted changes: `git -C "${CLAUDE_PROJECT_DIR}" diff`
    - Else use the most recent commit: `git -C "${CLAUDE_PROJECT_DIR}" diff HEAD~1 HEAD`
-   Write it to `${HOME}/.skill-loop/ci-fix.diff`.
+   Write it to `<STATE_DIR>/ci-fix.diff`.
 3. **Feed both into the reflect pipeline** (runs at `model_ci`, locally; it sets
    its own recursion guard):
    ```bash
    "${CLAUDE_PLUGIN_ROOT}/bin/reflect.sh" --force-ci \
-       "${HOME}/.skill-loop/ci-fail.log" \
-       "${HOME}/.skill-loop/ci-fix.diff"
+       "<STATE_DIR>/ci-fail.log" \
+       "<STATE_DIR>/ci-fix.diff"
    ```
-4. **Report**: read back `.skill-loop/candidates.md` and say which rule(s) were
+4. **Report**: read back `<STATE_DIR>/candidates.md` and say which rule(s) were
    created or reinforced, and whether anything is ready for `/skill-loop:promote`.
    A failure that produced a fix is high-signal — promote it promptly.
 

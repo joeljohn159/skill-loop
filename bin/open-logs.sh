@@ -6,11 +6,14 @@
 #   open-logs.sh [project-dir]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-PROJ="${1:-${CLAUDE_PROJECT_DIR:-$PWD}}"
 WATCH="$SCRIPT_DIR/watch.sh"
+# Resolve THIS project's activity log here (we have CLAUDE_PROJECT_DIR); the new
+# tab won't inherit it, so we pass the resolved path to watch.sh.
+. "$SCRIPT_DIR/../lib/common.sh" 2>/dev/null || true
+ACT="${ACTIVITY:-$HOME/.skill-loop/activity.log}"
 
 manual() {
-  printf 'Open a terminal tab and run:\n  "%s" "%s"\n' "$WATCH" "$PROJ"
+  printf 'Open a terminal tab and run:\n  "%s" "%s"\n' "$WATCH" "$ACT"
 }
 
 # Non-macOS (or no GUI): just tell the user the command.
@@ -21,7 +24,7 @@ fi
 # Bake a self-contained launcher so we never wrestle with nested AppleScript
 # quoting around paths that contain spaces (this plugin's path does).
 LAUNCH="$(mktemp -t skillloop-watch).command"
-printf '#!/usr/bin/env bash\nexec %q %q\n' "$WATCH" "$PROJ" >"$LAUNCH"
+printf '#!/usr/bin/env bash\nexec %q %q\n' "$WATCH" "$ACT" >"$LAUNCH"
 chmod +x "$LAUNCH"
 
 opened=""

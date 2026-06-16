@@ -24,18 +24,18 @@ emit_ctx() {
 # Collect skill-loop-managed skills (sl-*).
 names=""; n=0
 if [ -d "$SKILLS_DIR" ]; then
-  for d in "$SKILLS_DIR"/sl-*/; do
+  for d in "$SKILLS_DIR/${SL_SKILL_PREFIX}"*/; do
     [ -f "$d/SKILL.md" ] || continue
     nm="$(basename "$d")"; n=$((n + 1))
-    [ "$n" -le 12 ] && names="$names${nm#sl-}, "
+    [ "$n" -le 12 ] && names="$names${nm#${SL_SKILL_PREFIX}}, "
   done
 fi
 names="${names%, }"
 [ "$n" -gt 12 ] && names="$names (+$((n - 12)) more)"
 
-# Not bootstrapped yet?
-if [ "$n" -eq 0 ] && [ ! -f "$CONFIG" ]; then
-  emit_ctx "skill-loop is installed but this repo has no convention skills yet. Run /skill-loop:bootstrap once to crawl the codebase and generate judgment-level skills + a linter/formatter config."
+# This project not bootstrapped yet? (per-project: each repo gets its own skills)
+if [ "$n" -eq 0 ]; then
+  emit_ctx "skill-loop is installed but this project has no convention skills yet. Run /skill-loop:bootstrap once to crawl this codebase and generate its judgment-level skills (kept personal to you, never pushed)."
   exit 0
 fi
 

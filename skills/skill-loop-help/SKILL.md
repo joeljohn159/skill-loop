@@ -28,8 +28,10 @@ keeps them current automatically while staying near-zero tokens per session.
 - Then just work. Corrections, new libs, clean merges, and failures are captured
   automatically; most sessions cost zero extra tokens.
 - When the session-start note says candidates are ready, run `/skill-loop:promote`.
-- Candidates are staging only — skills change only on promote, and every change
-  is a separate git commit you can revert.
+- Candidates are staging only — skills change only on promote (never automatic),
+  and a backup is kept so every change is revertable.
 
-State lives in the project: skills in `.claude/skills/sl-*`, signals/candidates
-in `.skill-loop/`.
+Everything is personal and per-project, in your HOME — never the repo: skills in
+`~/.claude/skills/sl-<project>-*` (scoped with `paths:`), state in
+`~/.skill-loop/projects/<project>/`. Set `scope=global` in `~/.skill-loop/config`
+to share one set across all projects.

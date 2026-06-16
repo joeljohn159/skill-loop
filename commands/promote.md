@@ -1,5 +1,5 @@
 ---
-description: Promote recurring skill-loop candidate rules into real SKILL.md files, generalize them, prune stale entries, and git-commit each change so every evolution is revertable. Run occasionally, when candidates have accrued.
+description: Promote recurring skill-loop candidate rules into your personal per-project skills, generalize them, prune stale entries, and keep a backup so every change is revertable. Run occasionally, when candidates have accrued.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---
@@ -10,8 +10,11 @@ Promote staged candidate rules into your PERSONAL skills. This runs rarely and o
 Sonnet. Be careful and conservative — these edits change Claude's future
 behavior, so each must be clean, generalized, and individually revertable.
 
-Personal skills: `${HOME}/.claude/skills/`  ·  State: `${HOME}/.skill-loop/`
-(everything is personal — never the repo, never pushed)
+Everything is personal & per-project — never the repo, never pushed. First resolve
+this project's locations and use the values literally below:
+```bash
+"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILLS_DIR, SKILL_PREFIX, SKILL_PATHS
+```
 
 ## Step 0 — Honor the configured model
 Read `model_promote` from `${HOME}/.skill-loop/config` (default
@@ -20,9 +23,9 @@ the rest of this command via the **Task** tool (general-purpose agent) at that
 model and relay the result. Otherwise continue here on Sonnet.
 
 ## Step 1 — Load candidates
-Read `${HOME}/.skill-loop/candidates.jsonl` (machine source of
-truth; `candidates.md` is the human-readable render of the same data). Read the
-recurrence threshold from `.skill-loop/config` (`promote_min`, default 2).
+Read `<STATE_DIR>/candidates.jsonl` (machine source of truth; `candidates.md` is
+the human-readable render). Read the recurrence threshold from the global
+`${HOME}/.skill-loop/config` (`promote_min`, default 2).
 
 Select **only** candidates with `recurrence >= promote_min`. List them for the
 user before changing anything.
@@ -39,7 +42,8 @@ For each selected candidate:
   make it a skill.
 
 ## Step 3 — Write into the correct SKILL.md
-Map each candidate's `concern` to `${HOME}/.claude/skills/sl-<concern>/SKILL.md`.
+Map each candidate's `concern` to `<SKILLS_DIR>/<SKILL_PREFIX><concern>/SKILL.md`,
+and include `paths: <SKILL_PATHS>` in the frontmatter so it stays scoped to this repo.
 - If the skill exists: **merge** — append the new rule under the rules list and
   keep/append its verify command. Never clobber existing rules; de-duplicate if
   the rule is already present in spirit.
@@ -51,15 +55,15 @@ Map each candidate's `concern` to `${HOME}/.claude/skills/sl-<concern>/SKILL.md`
 ## Step 4 — Prune
 - Remove stale or low-value entries from skills: rules contradicted by the new
   ones, duplicates, or rules whose verify command no longer makes sense.
-- Remove promoted candidates from `.skill-loop/candidates.jsonl`, then
-  regenerate `.skill-loop/candidates.md` from the remaining JSONL (sorted by
+- Remove promoted candidates from `<STATE_DIR>/candidates.jsonl`, then
+  regenerate `<STATE_DIR>/candidates.md` from the remaining JSONL (sorted by
   recurrence desc). Leave sub-threshold candidates in place to keep accruing.
 
 ## Step 5 — Keep it revertable (personal, no repo commits)
 These skills are personal and live in `${HOME}/.claude/skills/`, outside any repo,
 so there is NO git commit and nothing is ever pushed. Keep changes revertable:
-- Before editing an existing `sl-<concern>/SKILL.md`, copy it to
-  `${HOME}/.skill-loop/skill-history/sl-<concern>.$(date +%s).md`.
+- Before editing an existing `<SKILL_PREFIX><concern>/SKILL.md`, copy it to
+  `<STATE_DIR>/skill-history/<SKILL_PREFIX><concern>.$(date +%s).md`.
 - To undo a promotion later, restore that backup or delete the rule/skill file.
 
 ## Step 6 — Concurrency note

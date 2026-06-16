@@ -81,17 +81,21 @@ For every convention you found, classify it:
 When in doubt, prefer FEWER, higher-signal rules. Bloat is paid for in tokens
 on every future session.
 
-## Step 4 — Write tiny skills (judgment rules only)
-For each judgment concern that has ≥1 real rule, write:
-`${HOME}/.claude/skills/sl-<concern>/SKILL.md`
-
-Use this exact shape (keep the body to a few dozen tokens — distilled rules,
-not prose):
+## Step 4 — Write tiny skills (judgment rules only) — personal & per-project
+First resolve where this project's skills go (kept personal to you, never in the
+repo, and scoped so they don't bleed into your other projects):
+```bash
+"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILLS_DIR, SKILL_PREFIX, SKILL_PATHS
+```
+For each judgment concern with ≥1 real rule, write
+`<SKILLS_DIR>/<SKILL_PREFIX><concern>/SKILL.md` using this exact shape (body =
+a few dozen tokens of distilled rules):
 
 ```markdown
 ---
-name: sl-<concern>
-description: <one line, specific enough to auto-load on relevance — e.g. "Error-handling conventions for this repo: when to return errors vs throw.">
+name: <SKILL_PREFIX><concern>
+description: <one precise line so it auto-loads on relevance — e.g. "Error-handling for this repo: when to return errors vs throw.">
+paths: <SKILL_PATHS>
 ---
 
 # <Concern> conventions
@@ -102,20 +106,18 @@ description: <one line, specific enough to auto-load on relevance — e.g. "Erro
 **Verify:** `<command that checks compliance>`
 ```
 
-`sl-<concern>` examples: `sl-naming`, `sl-layering`, `sl-testing`,
-`sl-error-handling`, `sl-domain`. The `description` is what makes the skill
-auto-load by relevance, so make it precise.
+`<concern>` examples: `naming`, `layering`, `testing`, `error-handling`, `domain`.
+The `description` makes it auto-load by relevance; `paths` scopes it to THIS repo
+so it never bleeds into your other projects.
 
-## Step 5 — Initialize state (personal, in your HOME — never the repo)
-skill-loop keeps everything personal. Ensure `${HOME}/.skill-loop/config` has the
-personal settings (the model keys from Step 0 plus the promotion threshold):
+## Step 5 — Initialize state (personal & per-project, in your HOME)
+Personal prefs (the model keys from Step 0 + the promotion threshold) live in the
+GLOBAL `${HOME}/.skill-loop/config`:
 ```
 promote_min=2
 ```
-Ensure the staging files exist (touch is fine):
-`${HOME}/.skill-loop/candidates.jsonl`, `${HOME}/.skill-loop/candidates.md`.
-Write skills ONLY to `${HOME}/.claude/skills/` (personal, global — they apply
-across all your projects). Never write skills into the repo or the plugin folder.
+Per-project signals/candidates live in the `STATE_DIR` printed by `sl-where.sh`
+(already created). Never write anything into the repo or the plugin folder.
 
 ## Step 6 — Report back
 Show the user:

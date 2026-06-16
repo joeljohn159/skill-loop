@@ -129,7 +129,7 @@
     <p class="eyebrow">Claude Code plugin</p>
     <h1 class="title">skill-loop</h1>
     <p class="lede">Learn a repository's conventions once, then keep them current automatically — staying near-zero tokens on the sessions where nothing notable happened.</p>
-    <p class="meta"><span>Version 0.1.0</span><span>MIT licensed</span><span>Bash &amp; Markdown, no runtime deps</span></p>
+    <p class="meta"><span>Version 0.3.0</span><span>MIT licensed</span><span>personal · per-project · never pushed</span></p>
   </header>
 
   <section>
@@ -210,18 +210,17 @@
   </section>
 
   <section>
-    <h2><span class="num">05</span> Project state</h2>
-    <p>Everything lives in the project itself, version-controlled where it matters.</p>
+    <h2><span class="num">05</span> Where it lives</h2>
+    <p>Personal and per-project — entirely in your home directory, never written into a repo. Each project gets its own bucket; one repo's rules never bleed into another.</p>
     <table>
       <thead><tr><th>Path</th><th>Contents</th></tr></thead>
       <tbody>
-        <tr><td><code>.claude/skills/sl-*/</code></td><td>The generated, auto-loading convention skills. Commit these.</td></tr>
-        <tr><td><code>.skill-loop/queue.jsonl</code></td><td>Raw captured signals, append-only.</td></tr>
-        <tr><td><code>.skill-loop/candidates.jsonl</code></td><td>Machine source of truth for staged rules.</td></tr>
-        <tr><td><code>.skill-loop/candidates.md</code></td><td>Readable rendering with recurrence and confidence.</td></tr>
-        <tr><td><code>.skill-loop/config</code></td><td>Detected stack, formatter command, promotion threshold.</td></tr>
+        <tr><td><code>~/.claude/skills/sl-&lt;project&gt;-*/</code></td><td>The learned skills, scoped with <code>paths:</code> so they only activate in that project.</td></tr>
+        <tr><td><code>~/.skill-loop/projects/&lt;project&gt;/</code></td><td>Per-project signals, candidates, snapshots, and activity log.</td></tr>
+        <tr><td><code>~/.skill-loop/config</code></td><td>Global personal prefs: model choices, promotion threshold, scope.</td></tr>
       </tbody>
     </table>
+    <p class="note">Prefer one shared set across all your projects? Set <code>scope=global</code> in the config. Nothing here is ever committed or pushed; the only thing bootstrap may add to a repo is a standard formatter config — shared team infra, not a skill.</p>
   </section>
 
   <section>
