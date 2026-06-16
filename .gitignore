@@ -1,0 +1,7 @@
+# Plugin runtime / dogfood state — not part of the distributed plugin.
+# (Generated when skill-loop runs in a project; not plugin components.)
+.skill-loop/
+.claude/
+
+# OS noise
+.DS_Store

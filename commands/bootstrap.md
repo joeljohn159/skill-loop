@@ -1,0 +1,141 @@
+---
+description: One-time crawl of the current repo to generate the judgment-level coding skills and the linter/formatter config needed so Claude doesn't fail on the next PR. Run once per repo.
+argument-hint: "[subdir to focus on, optional]"
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+model: opus
+---
+
+# skill-loop: BOOTSTRAP (Layer 1)
+
+You are performing the **one-time** bootstrap of skill-loop for this repository.
+Goal: read the codebase and emit exactly the conventions Claude needs so it
+won't violate them on the next PR. This is the only expensive, high-capability
+pass — make it count, but stay disciplined and conservative. Optional focus
+path: `$ARGUMENTS`
+
+Project root: `${CLAUDE_PROJECT_DIR}`
+Plugin scripts: `${CLAUDE_PLUGIN_ROOT}/bin`
+
+## Step 0 — Model preferences (first run only)
+If `${CLAUDE_PROJECT_DIR}/.skill-loop/config` has no `model_reflect=` line, the
+user hasn't chosen models yet. Before crawling, settle it:
+- Use **AskUserQuestion** to ask which model profile they want, offering
+  **Balanced** (Recommended — Opus bootstrap, Sonnet promote, Haiku auto-learning),
+  **Opus everywhere** (maximum quality, ignore token cost), and **Economy**
+  (cheapest). This is exactly what `/skill-loop:configure` does — apply the same
+  preset table and write the same keys (`profile`, `model_bootstrap`,
+  `model_promote`, `model_reflect`, `model_ci`).
+- If the session is non-interactive (e.g. headless), default to `balanced`.
+
+The configured `model_reflect` governs the recurring automatic learning, so this
+choice is the main cost lever. After writing it: if `model_bootstrap` (default
+`opus`) is **not** `opus`, relaunch the rest of this bootstrap via the **Task**
+tool (general-purpose agent) at that model and relay its result; otherwise
+continue here on Opus.
+
+## Step 1 — Detect the stack (cheap, deterministic first)
+Use Bash/Glob/Grep, not guesswork:
+- Languages & frameworks: by file-extension counts and manifest files
+  (`package.json`, `pyproject.toml`/`requirements*.txt`, `go.mod`, `Cargo.toml`,
+  `Gemfile`, `pubspec.yaml`, `*.csproj`, `composer.json`).
+- Test runner & layout: test dirs/globs (`*_test.go`, `*.test.ts`, `tests/`,
+  `*_spec.rb`, `test/`), and how tests are named/structured.
+- EXISTING formatter/linter configs already in the repo (respect them):
+  `.prettierrc*`, `.eslintrc*`, `eslint.config.*`, `ruff.toml`/`[tool.ruff]`,
+  `.flake8`, `.rubocop.yml`, `.editorconfig`, `rustfmt.toml`, `.golangci.yml`,
+  `dprint.json`, `biome.json`, `analysis_options.yaml`.
+
+## Step 2 — Observe conventions (sample, don't read everything)
+Read a handful of representative, recently-changed source files plus 2–3 tests.
+Identify concrete, recurring conventions in these buckets:
+- **naming** — file/dir/symbol naming intent (not casing a linter handles).
+- **layering** — directory/module boundaries, allowed dependency directions,
+  where business logic vs IO lives.
+- **testing** — what gets a test, table-driven vs example, mocking style,
+  fixture conventions.
+- **error-handling** — exceptions vs Result/error returns, wrapping, logging,
+  user-facing vs internal errors.
+- **domain / architectural** — repo-specific patterns (e.g. "all API handlers
+  return a typed envelope", "providers never import widgets").
+
+## Step 3 — THE HARD SPLIT (the most important rule)
+For every convention you found, classify it:
+
+- **Deterministic** — anything a formatter/linter can mechanically enforce:
+  indentation, quote style, import ordering, line length, trailing commas,
+  semicolons, spacing. **DO NOT create a skill for these.** Instead:
+  - If a config already exists, leave it; if a rule is missing from it, add it.
+  - If no config exists, generate a minimal, idiomatic one for the detected
+    stack (e.g. `.editorconfig` always; `.prettierrc` for JS/TS; `[tool.ruff]`
+    in `pyproject.toml` or `ruff.toml` for Python; `rustfmt.toml`; etc.).
+  - Record the one-file format command in `.skill-loop/config` as
+    `format_cmd=<cmd with {file}>` so Layer 2 (enforce) auto-fixes future edits.
+    Example: `format_cmd=npx --no-install prettier --write {file}`.
+
+- **Judgment-level** — anything requiring taste/intent (the buckets in Step 2).
+  These become skills. Each rule MUST come with a shell command that verifies
+  compliance (a grep, a test invocation, a script). If you cannot write a
+  verification command and the rule isn't enforceable by a linter, keep it only
+  if it's clearly high-value; otherwise drop it.
+
+When in doubt, prefer FEWER, higher-signal rules. Bloat is paid for in tokens
+on every future session.
+
+## Step 4 — Write tiny skills (judgment rules only)
+For each judgment concern that has ≥1 real rule, write:
+`${CLAUDE_PROJECT_DIR}/.claude/skills/sl-<concern>/SKILL.md`
+
+Use this exact shape (keep the body to a few dozen tokens — distilled rules,
+not prose):
+
+```markdown
+---
+name: sl-<concern>
+description: <one line, specific enough to auto-load on relevance — e.g. "Error-handling conventions for this repo: when to return errors vs throw.">
+---
+
+# <Concern> conventions
+
+- <imperative rule 1>
+- <imperative rule 2>
+
+**Verify:** `<command that checks compliance>`
+```
+
+`sl-<concern>` examples: `sl-naming`, `sl-layering`, `sl-testing`,
+`sl-error-handling`, `sl-domain`. The `description` is what makes the skill
+auto-load by relevance, so make it precise.
+
+## Step 5 — Initialize state
+Create/update `${CLAUDE_PROJECT_DIR}/.skill-loop/config` (key=value, one per
+line). Include at least:
+```
+stack=<short summary, e.g. "ts-node, jest, eslint+prettier">
+format_cmd=<one-file formatter command with {file}, or omit if none>
+lint_cmd=<repo-wide lint command, optional>
+test_cmd=<repo test command, optional>
+promote_min=2
+```
+Ensure the staging files exist (touch is fine):
+`.skill-loop/candidates.jsonl`, `.skill-loop/candidates.md`.
+Do NOT write any skills into the plugin directory — only into the project's
+`.claude/skills/`.
+
+## Step 6 — Report back
+Show the user:
+1. Detected stack.
+2. **Linter/formatter configs** created or modified (paths + why).
+3. **Skills** generated: for each, the path, its `description`, the rules, and
+   the verify command.
+4. Anything you deliberately did NOT turn into a skill because a linter covers
+   it (prove the hard split happened).
+5. The `.skill-loop/config` you wrote.
+
+Finally, record one line in the live activity log so the run shows in
+`/skill-loop:logs`:
+```bash
+"${CLAUDE_PLUGIN_ROOT}/bin/event.sh" BOOTSTRAP "generated <N> skill(s) + <M> config(s)"
+```
+
+Keep skills minimal and every rule verifiable. After this runs once, the hooks
+take over and the skills improve on their own.

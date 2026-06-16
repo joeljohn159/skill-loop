@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skill-loop — documentation</title>
+<style>
+  :root{
+    --paper:#fcfbf7;
+    --ink:#1b1c1e;
+    --soft:#54565b;
+    --faint:#8a8d93;
+    --rule:#e4e1d8;
+    --rule-strong:#d4d0c4;
+    --accent:#7a2e2e;          /* muted oxblood */
+    --accent-soft:#9a5a3b;
+    --code-bg:#f4f2ec;
+    --code-ink:#33353a;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Charter","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:18px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .page{max-width:720px;margin:0 auto;padding:0 28px}
+
+  /* ---- masthead ---- */
+  .masthead{padding:76px 0 40px;border-bottom:1px solid var(--rule-strong)}
+  .eyebrow{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:600;
+    color:var(--accent);margin:0 0 18px;
+  }
+  h1.title{
+    font-size:46px;line-height:1.05;letter-spacing:-.015em;font-weight:600;margin:0;
+  }
+  .lede{
+    font-size:21px;line-height:1.6;color:var(--soft);margin:20px 0 0;max-width:36em;
+  }
+  .meta{
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:13px;color:var(--faint);margin-top:28px;letter-spacing:.01em;
+  }
+  .meta span+span:before{content:"·";margin:0 .6em;color:var(--rule-strong)}
+
+  /* ---- sections ---- */
+  section{padding:46px 0;border-bottom:1px solid var(--rule)}
+  section:last-of-type{border-bottom:none}
+  h2{
+    font-size:13px;font-weight:600;letter-spacing:.04em;margin:0 0 22px;
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink);text-transform:uppercase;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;font-size:12px}
+  h3{font-size:20px;font-weight:600;margin:30px 0 8px;letter-spacing:-.01em}
+  p{margin:0 0 16px}
+  p.note{color:var(--soft);font-size:16px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(122,46,46,.28)}
+  a:hover{border-bottom-color:var(--accent)}
+  strong{font-weight:600}
+  em{font-style:italic;color:var(--ink)}
+
+  /* ---- code ---- */
+  code{
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.82em;background:var(--code-bg);color:var(--code-ink);
+    padding:.12em .4em;border-radius:3px;
+  }
+  pre{
+    background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;
+    padding:18px 20px;overflow:auto;margin:18px 0;
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    font-size:14px;line-height:1.6;color:var(--code-ink);
+  }
+  pre code{background:none;padding:0;font-size:inherit;color:inherit}
+  .cmt{color:var(--faint)}
+
+  /* ---- table ---- */
+  table{width:100%;border-collapse:collapse;margin:6px 0 4px;
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px}
+  thead th{
+    text-align:left;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--faint);padding:0 14px 10px 0;border-bottom:1px solid var(--rule-strong);
+  }
+  tbody td{padding:14px 14px 14px 0;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink)}
+  tbody tr:last-child td{border-bottom:none}
+  td.layer{white-space:nowrap;font-weight:600}
+  td.layer small{display:block;font-weight:400;color:var(--faint);font-size:12px;margin-top:2px}
+  td.cost{white-space:nowrap;color:var(--accent-soft);font-variant-numeric:tabular-nums}
+
+  /* ---- definition list (signals) ---- */
+  dl{margin:4px 0 0}
+  dl div{padding:16px 0;border-bottom:1px solid var(--rule);display:grid;
+    grid-template-columns:170px 1fr;gap:24px;align-items:baseline}
+  dl div:last-child{border-bottom:none}
+  dt{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+  dd{margin:0;color:var(--soft);font-size:16px}
+  dd b{color:var(--ink);font-weight:600}
+
+  ul.clean{margin:0;padding:0;list-style:none}
+  ul.clean li{position:relative;padding-left:22px;margin:0 0 12px;color:var(--soft);font-size:16px}
+  ul.clean li:before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;
+    background:var(--accent);border-radius:50%}
+  ul.clean li b{color:var(--ink)}
+
+  footer{padding:36px 0 80px;color:var(--faint);font-size:13px;
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+
+  @media (max-width:560px){
+    h1.title{font-size:36px}
+    .lede{font-size:19px}
+    dl div{grid-template-columns:1fr;gap:6px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Claude Code plugin</p>
+    <h1 class="title">skill-loop</h1>
+    <p class="lede">Learn a repository's conventions once, then keep them current automatically — staying near-zero tokens on the sessions where nothing notable happened.</p>
+    <p class="meta"><span>Version 0.1.0</span><span>MIT licensed</span><span>Bash &amp; Markdown, no runtime deps</span></p>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span> Overview</h2>
+    <p>The first run reads the codebase and generates exactly the skills Claude needs so it won't violate the project's conventions on the next pull request. Every session afterward, the plugin refines those skills on its own.</p>
+    <p>It is organised as six layers. The expensive, high-capability work is rare and explicit; the constant work is cheap or free.</p>
+    <table>
+      <thead><tr><th>Layer</th><th>Trigger</th><th>Cost</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td class="layer">Bootstrap<small>Layer 1</small></td><td>command</td><td class="cost">Opus, once</td>
+            <td>Crawl the repo. Judgment rules become small skills; mechanically enforceable rules become formatter and linter configuration. Every rule ships with a command that verifies it.</td></tr>
+        <tr><td class="layer">Enforce<small>Layer 2</small></td><td>PostToolUse</td><td class="cost">0 tokens</td>
+            <td>Run the project formatter on each edited file. Deterministic rules are auto-fixed and never become skills.</td></tr>
+        <tr><td class="layer">Capture<small>Layer 3</small></td><td>hooks</td><td class="cost">0 tokens</td>
+            <td>Append raw signals to a queue — corrections, new patterns, approvals, and failures.</td></tr>
+        <tr><td class="layer">Reflect<small>Layer 4</small></td><td>Stop hook</td><td class="cost">gated</td>
+            <td>A deterministic pre-scan first. With no signal it exits free; otherwise a single Haiku pass reads only the flagged diffs, extracts and de-duplicates candidate rules, and stages them with a recurrence count.</td></tr>
+        <tr><td class="layer">Promote<small>Layer 5</small></td><td>command</td><td class="cost">Sonnet, rare</td>
+            <td>Candidates that have recurred are generalised, written into the correct skill, pruned of stale entries, and committed to git one change at a time.</td></tr>
+        <tr><td class="layer">CI feedback<small>Layer 6</small></td><td>command</td><td class="cost">model_ci</td>
+            <td>Paste a failing build log from any CI; it and your local fix become a high-value failure candidate. Runs locally — nothing is installed in the CI runner.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span> Installation</h2>
+    <p>Add the marketplace and install the plugin:</p>
+<pre><code>/plugin marketplace add joeljohn159/skill-loop
+/plugin install skill-loop@skill-loop</code></pre>
+    <p>Then run the one-time bootstrap inside the repository you want it to learn:</p>
+<pre><code>/skill-loop:bootstrap</code></pre>
+    <p class="note">After that, work as usual. The hooks take over and the skills evolve in the background.</p>
+
+    <h3>Watching it work</h3>
+    <p>Run <code>/skill-loop:logs</code> to open a new terminal tab beside the session, streaming a clean, colorized account of what the plugin is doing — separate from the verbose debug log.</p>
+<pre><code>13:05:58  SKILL        used: sl-error-handling          <span class="cmt">&#8592; a learned skill fired</span>
+13:06:00  CORRECTION   a.ts: user edited Claude's output after the write
+13:06:00  REFLECT      reflecting on 2 signal(s) · haiku
+13:06:00  REFLECT      staged 1 candidate(s); 0 ready to promote
+13:06:00  PROMOTE      sl-error-handling &#8592; Return Result for expected errors</code></pre>
+    <p class="note">On iTerm it opens a tab; on Terminal a tab or window. Anywhere else — a VS Code terminal or a remote box — it prints the single command to run yourself.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span> What it learns from</h2>
+    <p>Capture is pure heuristics — four kinds of signal, so it learns from anything new, not only mistakes.</p>
+    <dl>
+      <div><dt>Correction</dt><dd>You edit a file Claude wrote. Detected by hashing the write ledger against disk, with a real before-and-after diff preserved.</dd></div>
+      <div><dt>New pattern</dt><dd>You introduce a library or tool Claude didn't use — install commands and dependency-manifest changes.</dd></div>
+      <div><dt>Approval</dt><dd>A task completes cleanly: a commit, merge, or push that finished without error.</dd></div>
+      <div><dt>Failure</dt><dd>A command, test, or build errors — including continuous-integration failures via Layer&nbsp;6.</dd></div>
+    </dl>
+    <p class="note">Learning runs locally on the Claude you're already using. <code>/skill-loop:learn</code> reflects on demand over the current chat (optionally with an explicit lesson); <code>/skill-loop:learn-from-ci</code> takes a pasted red-build log from any provider. Your CI never runs Claude.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span> Token model</h2>
+    <ul class="clean">
+      <li>The Stop reflection is the <b>only</b> per-session model call, and it is skipped entirely when the pre-scan finds no signal.</li>
+      <li>Model tiering is strict: <b>Haiku</b> for capture, extraction, and de-duplication; <b>Sonnet</b> or <b>Opus</b> only for bootstrap and promote.</li>
+      <li>Skills stay small and rely on progressive disclosure — the description loads, the body loads on a relevance match. Session start injects only a compact index, never the whole corpus.</li>
+      <li>De-duplication and a recurrence threshold gate every write, so skill files never bloat. Bloat is paid for in tokens on every future session.</li>
+    </ul>
+
+    <h3>Choosing your models</h3>
+    <p>The tiers above are the <em>Balanced</em> default. Run <code>/skill-loop:configure</code> at any time — or answer the prompt bootstrap shows on first run — to change them. A user who isn't worried about token cost can put Opus on every stage.</p>
+    <table>
+      <thead><tr><th>Profile</th><th>Bootstrap</th><th>Promote</th><th>Reflect</th><th>CI</th></tr></thead>
+      <tbody>
+        <tr><td class="layer">Maximum</td><td>opus</td><td>opus</td><td>opus</td><td>opus</td></tr>
+        <tr><td class="layer">Balanced</td><td>opus</td><td>sonnet</td><td>haiku</td><td>haiku</td></tr>
+        <tr><td class="layer">Economy</td><td>sonnet</td><td>haiku</td><td>haiku</td><td>haiku</td></tr>
+        <tr><td class="layer">Custom</td><td colspan="4">choose each stage individually</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><code>reflect</code> is the only automatic per-session call, so its model is the main cost lever. The choice is stored in <code>.skill-loop/config</code> and applies immediately. For headless or CI use, pass the profile as an argument — no prompt.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span> Project state</h2>
+    <p>Everything lives in the project itself, version-controlled where it matters.</p>
+    <table>
+      <thead><tr><th>Path</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td><code>.claude/skills/sl-*/</code></td><td>The generated, auto-loading convention skills. Commit these.</td></tr>
+        <tr><td><code>.skill-loop/queue.jsonl</code></td><td>Raw captured signals, append-only.</td></tr>
+        <tr><td><code>.skill-loop/candidates.jsonl</code></td><td>Machine source of truth for staged rules.</td></tr>
+        <tr><td><code>.skill-loop/candidates.md</code></td><td>Readable rendering with recurrence and confidence.</td></tr>
+        <tr><td><code>.skill-loop/config</code></td><td>Detected stack, formatter command, promotion threshold.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span> Safety</h2>
+    <ul class="clean">
+      <li>Automatic learning writes only to staging. A person runs promote, which commits each change to git — so every step in a skill's evolution is reviewable and revertable.</li>
+      <li>Concurrent sessions reflecting into the same files use an atomic directory lock and merge by recurrence count rather than overwrite.</li>
+      <li>Hooks are defensive. Each exits cleanly and degrades gracefully when an optional tool or a well-formed input is missing, so a session is never blocked.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span> Layout</h2>
+<pre><code>.claude-plugin/   plugin.json, marketplace.json
+commands/         bootstrap, promote, learn-from-ci, learn, configure, logs
+skills/           skill-loop-help        <span class="cmt"># ships with the plugin</span>
+hooks/            hooks.json             <span class="cmt"># SessionStart, PostToolUse, Stop</span>
+bin/              enforce, capture, reflect, session-index, watch, open-logs, event
+lib/              common.sh</code></pre>
+    <p class="note">All internal paths resolve through <code>${CLAUDE_PLUGIN_ROOT}</code> and <code>${CLAUDE_PROJECT_DIR}</code>; nothing is hardcoded.</p>
+  </section>
+
+  <footer>skill-loop · MIT · the plain-text reference lives in README.md</footer>
+
+</div>
+</body>
+</html>

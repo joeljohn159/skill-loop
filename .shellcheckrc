@@ -1,0 +1,4 @@
+# skill-loop shell lint config (deterministic rules — enforced, not skilled)
+external-sources=true      # bin/*.sh source lib/common.sh dynamically
+enable=require-variable-braces
+enable=quote-safe-variables
