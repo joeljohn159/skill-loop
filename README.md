@@ -18,6 +18,16 @@ Then, once per repo:
 /skill-loop:bootstrap
 ```
 
+## Commands
+| Command | When | What it does |
+|---|---|---|
+| `/skill-loop:bootstrap` | once per repo | Crawl the codebase → generate skills + linter/formatter config. Asks your model profile on first run. |
+| `/skill-loop:logs` | anytime | Open a live, readable activity log in a new terminal tab beside the session. |
+| `/skill-loop:learn [lesson]` | anytime | Learn now from the current chat — optionally capture a lesson you state explicitly. |
+| `/skill-loop:learn-from-ci` | on a red build | Paste a failing CI log → stage a fix rule. Any CI, runs locally, nothing in the runner. |
+| `/skill-loop:promote` | when candidates pile up | Turn recurring candidates into committed skills (manual — never automatic). |
+| `/skill-loop:configure` | anytime | Choose models per stage: Maximum / Balanced / Economy / Custom. |
+
 ## How it works — 6 layers
 
 | Layer | Trigger | Cost | Job |
@@ -94,12 +104,13 @@ profile argument, no prompt.
 - `.claude/skills/sl-*/SKILL.md` — the generated, auto-loading skills (commit these).
 - `.skill-loop/` — runtime state: `queue.jsonl` (signals), `candidates.jsonl`
   (machine source of truth), `candidates.md` (human view), `config`, `snap/`
-  (snapshots for correction diffs), `wrote.jsonl` (write ledger). Gitignored by
-  default except the candidate files.
+  (snapshots for correction diffs), `wrote.jsonl` (write ledger). Gitignore this
+  whole directory — it's transient runtime state.
 
 ## Safety
 - Skill edits go to staging (`candidates.*`), then a human runs `/skill-loop:promote`,
-  which git-commits each change — always revertable.
+  which git-commits each change — always revertable. **It never auto-promotes**;
+  nothing rewrites a skill on its own.
 - Concurrency: two sessions reflecting into the same files use an atomic
   `mkdir` lock and append/merge (recurrence-counted), never clobber.
 - Hooks are defensive: every hook exits 0 and degrades gracefully (missing
