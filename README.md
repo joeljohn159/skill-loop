@@ -1,151 +1,128 @@
-<div align="center">
+# skill-loop
 
-# 🔁 skill-loop
+A Claude Code plugin that learns a codebase's conventions and applies them on
+later sessions. It generates a small set of coding skills from an existing
+repository, then keeps them current as you work, learning from corrections, new
+patterns, clean merges, and failures.
 
-### Self-improving coding skills for Claude Code
+Learned skills are personal to you and scoped per project. Nothing is committed
+to or pushed into your repositories, and most sessions cost no additional tokens.
 
-**Learn a codebase once — then get a little better on every session, automatically.**
-Personal to you, never pushed to a repo, and free on the sessions where nothing happens.
+![version](https://img.shields.io/badge/version-0.3.0-blue)
+![license](https://img.shields.io/badge/license-MIT-blue)
 
-![version](https://img.shields.io/badge/version-0.3.0-7a2e2e?style=flat-square)
-![license](https://img.shields.io/badge/license-MIT-2ea043?style=flat-square)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8957e5?style=flat-square)
-![idle cost](https://img.shields.io/badge/idle%20cost-0%20tokens-2ea043?style=flat-square)
-![skills](https://img.shields.io/badge/skills-personal%20·%20never%20pushed-f59e0b?style=flat-square)
-![built with](https://img.shields.io/badge/built%20with-bash-1f6feb?style=flat-square)
+## Installation
 
 ```bash
 /plugin marketplace add joeljohn159/skill-loop
 /plugin install skill-loop@skill-loop
+```
+
+Then run once per repository:
+
+```bash
 /skill-loop:bootstrap
 ```
 
-</div>
+Bootstrap reads the codebase and writes a small set of convention skills. After
+that the plugin works in the background. You interact with it only to promote
+recurring lessons, and occasionally to change models or view its log.
 
-> [!TIP]
-> The first run reads your codebase and generates exactly the skills Claude needs so it won't break your conventions on the next PR. After that it improves them on its own — and stays at **zero tokens** on sessions where nothing notable happens.
+## How it works
 
----
+The plugin is organized as six layers. The expensive, high-capability work is
+rare and explicit. The recurring per-session work is cheap, and is skipped
+entirely when there is nothing to learn.
 
-## ✨ What it does
-
-- 🧠 **Learns your conventions** — naming, layering, testing, error-handling, domain patterns.
-- ✂️ **Hard split** — anything a linter/formatter can enforce becomes config; only *judgment* rules become skills.
-- 🪶 **Stays cheap** — one gated model call per session, skipped entirely when there's no signal.
-- 👤 **Personal & per-project** — each repo's learned skills live in *your* home dir, scoped to that project. Teammates are never affected; nothing is committed or pushed.
-- ⏪ **Always reversible** — skills are plain files you can read, edit, or delete; promotion keeps a backup.
-
-## 🚀 Quickstart
-
-| Step | Command | |
-|------|---------|---|
-| 1 | `/plugin marketplace add joeljohn159/skill-loop` | add the marketplace |
-| 2 | `/plugin install skill-loop@skill-loop` | install the plugin |
-| 3 | `/skill-loop:bootstrap` | once — seed your skills + pick your models |
-| 4 | *(just work)* | it captures, reflects & applies skills automatically |
-| 5 | `/skill-loop:promote` | occasionally — lock in the rules that recur |
-
-## 🔄 The loop
+| Layer | Trigger | Cost | Responsibility |
+|-------|---------|------|----------------|
+| Bootstrap | `/skill-loop:bootstrap` | Opus, once | Read the repo. Judgment rules become skills; mechanically enforceable rules become formatter and linter configuration. Each rule ships with a command that verifies it. |
+| Enforce | PostToolUse hook | none | Run the project formatter on each edited file. Deterministic rules are fixed automatically and never become skills. |
+| Capture | hooks | none | Record raw signals: corrections, new patterns, approvals, failures. |
+| Reflect | Stop hook | gated | A deterministic pre-scan runs first; with no signal it exits at no cost. Otherwise one model pass extracts and de-duplicates candidate rules. |
+| Promote | `/skill-loop:promote` | Sonnet, rare | Generalize recurring candidates, write them into your skills, and prune stale entries. Manual, never automatic. |
+| CI feedback | `/skill-loop:learn-from-ci` | model_ci | Turn a failing build and the fix that resolved it into a candidate rule, processed locally. |
 
 ```mermaid
 flowchart LR
-    B([🚀 bootstrap<br/>once]):::cmd --> W[💻 you just work]
-    W -->|edits a file| E[⚙️ enforce<br/>format · 0 tok]:::auto
-    W -->|signals| C[📥 capture<br/>0 tok]:::auto
-    C --> R{🧠 reflect<br/>any signal?}:::auto
-    R -->|no| Z[✅ exit · 0 tokens]:::free
-    R -->|yes| S[📝 stage candidate]:::auto
-    S -->|recurs ≥ 2| P([⭐ promote]):::cmd
-    P --> K[("👤 personal skill<br/>~/.claude/skills · per-project")]:::skill
-    K -.->|auto-applies next time| W
-
-    classDef cmd   fill:#7a2e2e,stroke:#7a2e2e,color:#fff
-    classDef auto  fill:#1f6feb,stroke:#1f6feb,color:#fff
-    classDef free  fill:#2ea043,stroke:#2ea043,color:#fff
-    classDef skill fill:#8957e5,stroke:#8957e5,color:#fff
+  bootstrap --> work[work normally]
+  work -->|edit a file| enforce[enforce: format]
+  work -->|signals| capture
+  capture --> reflect{Stop: signal?}
+  reflect -->|no| done[exit, no cost]
+  reflect -->|yes| stage[stage candidate]
+  stage -->|recurs| promote
+  promote --> skill[(personal skill)]
+  skill -.->|applies next time| work
 ```
 
-## 🧭 The six layers
+Reflection is the only automatic per-session model call, and it is gated: a
+correction, a new dependency, a failed test, or a clean merge will trigger it,
+while an uneventful session triggers nothing.
 
-| # | Layer | Trigger | Cost | What it does |
-|---|-------|---------|------|--------------|
-| 1 | 🚀 **Bootstrap** | `/skill-loop:bootstrap` | Opus, once | Crawl the repo. Judgment rules → tiny skills. Linter-enforceable rules → formatter config. Every rule ships with a verify command. |
-| 2 | ⚙️ **Enforce** | PostToolUse | 🟢 **0 tokens** | Auto-run the project formatter on each edited file. Deterministic rules never become skills. |
-| 3 | 📥 **Capture** | hooks | 🟢 **0 tokens** | Append raw signals: `CORRECTION` · `NEW_PATTERN` · `APPROVAL` · `FAILURE`. |
-| 4 | 🧠 **Reflect** | Stop hook | 🟡 gated (~0 most sessions) | No signal → exit free. Else **one model pass** over only the flagged diffs → de-duped candidate rules with a recurrence count. |
-| 5 | ⭐ **Promote** | `/skill-loop:promote` | Sonnet, rare | Recurring candidates → generalized → written into your personal skills (manual, never automatic). |
-| 6 | 🔧 **CI feedback** | `/skill-loop:learn-from-ci` | model_ci | Paste a failing build log from **any** CI; it + your local fix become a high-value candidate. Runs locally. |
+## Commands
 
-## 🧠 What it learns from
+| Command | Purpose |
+|---------|---------|
+| `/skill-loop:bootstrap` | Read the repo and generate its convention skills. Run once per project; prompts for your model profile on first use. |
+| `/skill-loop:promote` | Move recurring candidates into your skills. Manual, never automatic. |
+| `/skill-loop:learn` | Reflect on the current session immediately, instead of waiting for it to end. Accepts an optional lesson to record. |
+| `/skill-loop:learn-from-ci` | Paste a failing CI log and let the fix become a candidate rule. Works with any CI; runs locally. |
+| `/skill-loop:configure` | Choose which model each stage uses. |
+| `/skill-loop:logs` | Open a readable activity log in a separate terminal tab. |
 
-| Signal | Meaning |
-|--------|---------|
-| 🟦 **CORRECTION** | You edit a file Claude wrote (detected by hashing; a real before/after diff is kept). |
-| 🟪 **NEW_PATTERN** | You introduce a library/tool Claude didn't use. |
-| 🟩 **APPROVAL** | A task lands cleanly — a commit/merge/push with no errors. |
-| 🟥 **FAILURE** | A command, test, or build errors (including CI). |
+## Models
 
-## 🎛️ Commands
-
-| Command | When | What |
-|---------|------|------|
-| `/skill-loop:bootstrap` | once per repo | Crawl → seed personal skills + formatter config. Asks your model profile on first run. |
-| `/skill-loop:logs` | anytime | Open a live, colorized activity log in a new terminal tab. |
-| `/skill-loop:learn [lesson]` | anytime | Learn now from the current chat; optionally capture a lesson you state. |
-| `/skill-loop:learn-from-ci` | on a red build | Paste a failing CI log → stage a fix rule. Any CI, runs locally. |
-| `/skill-loop:promote` | when candidates pile up | Turn recurring candidates into skills (**manual — never automatic**). |
-| `/skill-loop:configure` | anytime | Choose models per stage: Maximum / Balanced / Economy / Custom. |
-
-## 👤 Personal by design
-
-> [!IMPORTANT]
-> Everything skill-loop learns is **yours**, **per-project**, and **never touches a repo**.
-> - **Skills** → `~/.claude/skills/sl-<project>-*` — scoped with `paths:` so each repo's rules only activate in that repo (no cross-project bleed).
-> - **Learning state** → `~/.skill-loop/projects/<project>/` — signals, candidates, logs (one bucket per repo).
-> - **Global prefs** → `~/.skill-loop/config` — your model choices + thresholds.
->
-> Teammates are unaffected; nothing is committed or pushed. Want one shared set across all projects instead? Set `scope=global` in the config. (The one thing `bootstrap` may add to a repo is a standard formatter config like `.prettierrc` — shared team infra, **not** a skill.)
-
-## 💸 Token discipline
-
-- The Stop reflection is the **only** automatic per-session model call — and it's skipped entirely when the deterministic pre-scan finds no signal.
-- Strict tiering: **Haiku** for capture/extraction; **Sonnet/Opus** only for bootstrap & promote (all configurable).
-- Skills stay tiny via progressive disclosure — the `description` loads, the body loads on match. Session start injects only a compact index.
-- De-dup + a recurrence threshold gate every write, so skill files never bloat.
-
-## 🎚️ Choosing your models
-
-Run `/skill-loop:configure` (bootstrap also asks on first run). `reflect` is the only automatic call, so its model is the main cost lever — set everything to Opus if you don't worry about tokens.
+Each stage's model is configurable through `/skill-loop:configure` (bootstrap
+also prompts on first run). Reflection is the only automatic call, so its model
+is the main cost lever.
 
 | Profile | bootstrap | promote | reflect | ci |
-|---------|-----------|---------|---------|----|
-| 🟣 **Maximum** — quality first | opus | opus | opus | opus |
-| 🟢 **Balanced** — default | opus | sonnet | haiku | haiku |
-| 🔵 **Economy** — cheapest | sonnet | haiku | haiku | haiku |
-| ⚪ **Custom** | pick each stage | | | |
+|---------|-----------|---------|---------|-----|
+| Maximum | opus | opus | opus | opus |
+| Balanced (default) | opus | sonnet | haiku | haiku |
+| Economy | sonnet | haiku | haiku | haiku |
+| Custom | chosen per stage | | | |
 
-## 🛡️ Safety
+## Storage and privacy
 
-- ✅ **Never auto-promotes** — reflection only *stages* candidates; skills change only when you run `/skill-loop:promote`.
-- ↩️ **Revertable** — promotion backs up the prior skill under `~/.skill-loop/projects/<project>/skill-history/`; undo = restore or delete the file.
-- 🔒 **Never blocks you** — every hook exits cleanly and degrades gracefully if `jq` / `claude` / a formatter is missing.
-- 🧯 **Off switches** — `claude plugin disable skill-loop`, or `reflect=off` / `capture=off` / `enforce=off` in `~/.skill-loop/config`, or delete any `sl-*` skill.
+Everything skill-loop learns is personal, per-project, and kept in your home
+directory. Nothing is written into a repository.
 
-## 📂 Layout
+- Skills: `~/.claude/skills/sl-<project>-*`, scoped with a `paths:` rule so they
+  activate only inside their own project.
+- Per-project state: `~/.skill-loop/projects/<project>/` (signals, candidates,
+  snapshots, activity log).
+- Global preferences: `~/.skill-loop/config` (model choices, thresholds, scope).
 
-```text
-.claude-plugin/   plugin.json · marketplace.json
-commands/         bootstrap · promote · learn-from-ci · learn · configure · logs
-skills/           skill-loop-help            # ships with the plugin
-hooks/            hooks.json                 # SessionStart · PostToolUse · Stop
-bin/              enforce · capture · reflect · session-index · watch · open-logs · event
+Projects stay isolated, so one repository's rules never apply in another. To
+share a single set across all projects, set `scope=global` in the config. The
+only file bootstrap may add to a repository is a standard formatter config such
+as `.prettierrc`, which is shared team infrastructure rather than a skill.
+
+## Safety
+
+- Promotion is always manual. Reflection only stages candidates; skills change
+  when you run `/skill-loop:promote`.
+- Each promotion backs up the previous version of the skill, so any change can
+  be reverted.
+- Hooks never block a session. They exit cleanly and degrade gracefully when an
+  optional tool (`jq`, `claude`, a formatter) is unavailable.
+- To turn it off: `claude plugin disable skill-loop`, or set `reflect=off`,
+  `capture=off`, or `enforce=off` in the config, or delete any generated skill.
+
+## Layout
+
+```
+.claude-plugin/   plugin.json, marketplace.json
+commands/         bootstrap, promote, learn, learn-from-ci, configure, logs
+hooks/            hooks.json
+bin/              enforce, capture, reflect, session-index, watch, open-logs, event, sl-where
 lib/              common.sh
 ```
 
-All internal paths resolve through `${CLAUDE_PLUGIN_ROOT}` / `${HOME}` — nothing hardcoded.
+Internal paths resolve through `${CLAUDE_PLUGIN_ROOT}` and `${HOME}`.
 
----
+## License
 
-<div align="center">
-<sub>Built for Claude Code · MIT · a styled HTML version lives in <code>readme.html</code></sub>
-</div>
+MIT. A styled HTML version of this document is available in `readme.html`.
