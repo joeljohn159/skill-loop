@@ -10,7 +10,7 @@ model: haiku
 Let the user decide the quality/cost trade-off. Some users won't worry about
 token cost and want Opus everywhere; others want the cheap defaults.
 
-Config file: `${CLAUDE_PROJECT_DIR}/.skill-loop/config`
+Config file: `${HOME}/.skill-loop/config`
 Requested preset (optional): `$1`
 
 ## Presets
@@ -37,7 +37,7 @@ model is the one that matters most for ongoing cost.
    using the table above. Valid model names: `opus`, `sonnet`, `haiku`.
 3. **Write the config** atomically, preserving any non-model keys:
    ```bash
-   cfg="${CLAUDE_PROJECT_DIR}/.skill-loop/config"; mkdir -p "$(dirname "$cfg")"; touch "$cfg"
+   cfg="${HOME}/.skill-loop/config"; mkdir -p "$(dirname "$cfg")"; touch "$cfg"
    grep -vE '^(profile|model_bootstrap|model_promote|model_reflect|model_ci)=' "$cfg" > "$cfg.tmp" 2>/dev/null || true
    {
      echo "profile=<chosen-preset-or-custom>"

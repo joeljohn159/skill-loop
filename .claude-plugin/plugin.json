@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "skill-loop",
   "displayName": "Skill Loop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Bootstraps coding skills from an existing repo, then automatically improves them as you work — learning from corrections, new patterns, approvals, and failures. Expensive work is rare; the constant per-session cost is zero tokens unless a real signal is detected.",
   "author": {
     "name": "Joel John",

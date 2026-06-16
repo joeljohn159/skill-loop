@@ -21,11 +21,15 @@ else
   SL_PLUGIN_ROOT="$(dirname "$_sl_dir")"
 fi
 
-# Project being worked on: Claude Code exports CLAUDE_PROJECT_DIR to hooks.
+# Project being worked on (used only to find project-local formatters / run them
+# in the right cwd — NOT for storing anything).
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-STATE_DIR="$PROJECT_DIR/.skill-loop"
-SKILLS_DIR="$PROJECT_DIR/.claude/skills"     # generated skills live here (auto-discovered)
+# skill-loop is PERSONAL by design: everything it learns lives in the user's HOME
+# and is never written into any repo. Skills are global user-scope skills (they
+# auto-load across all of that user's projects); learning state is one personal store.
+STATE_DIR="${HOME}/.skill-loop"
+SKILLS_DIR="${HOME}/.claude/skills"          # global user-scope skills (auto-discovered everywhere)
 QUEUE="$STATE_DIR/queue.jsonl"               # raw captured signals (append-only)
 CANDIDATES="$STATE_DIR/candidates.md"        # staged rules awaiting promotion
 WROTE="$STATE_DIR/wrote.jsonl"               # ledger of files Claude wrote (for correction detection)

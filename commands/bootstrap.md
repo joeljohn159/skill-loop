@@ -17,7 +17,7 @@ Project root: `${CLAUDE_PROJECT_DIR}`
 Plugin scripts: `${CLAUDE_PLUGIN_ROOT}/bin`
 
 ## Step 0 — Model preferences (first run only)
-If `${CLAUDE_PROJECT_DIR}/.skill-loop/config` has no `model_reflect=` line, the
+If `${HOME}/.skill-loop/config` has no `model_reflect=` line, the
 user hasn't chosen models yet. Before crawling, settle it:
 - Use **AskUserQuestion** to ask which model profile they want, offering
   **Balanced** (Recommended — Opus bootstrap, Sonnet promote, Haiku auto-learning),
@@ -68,9 +68,9 @@ For every convention you found, classify it:
   - If no config exists, generate a minimal, idiomatic one for the detected
     stack (e.g. `.editorconfig` always; `.prettierrc` for JS/TS; `[tool.ruff]`
     in `pyproject.toml` or `ruff.toml` for Python; `rustfmt.toml`; etc.).
-  - Record the one-file format command in `.skill-loop/config` as
-    `format_cmd=<cmd with {file}>` so Layer 2 (enforce) auto-fixes future edits.
-    Example: `format_cmd=npx --no-install prettier --write {file}`.
+  - Layer 2 (enforce) auto-detects and runs the project's formatter per file, so
+    no command needs recording. NOTE: a formatter config is the ONLY thing
+    bootstrap may write into the repo — it's shared team infra, not a personal skill.
 
 - **Judgment-level** — anything requiring taste/intent (the buckets in Step 2).
   These become skills. Each rule MUST come with a shell command that verifies
@@ -83,7 +83,7 @@ on every future session.
 
 ## Step 4 — Write tiny skills (judgment rules only)
 For each judgment concern that has ≥1 real rule, write:
-`${CLAUDE_PROJECT_DIR}/.claude/skills/sl-<concern>/SKILL.md`
+`${HOME}/.claude/skills/sl-<concern>/SKILL.md`
 
 Use this exact shape (keep the body to a few dozen tokens — distilled rules,
 not prose):
@@ -106,20 +106,16 @@ description: <one line, specific enough to auto-load on relevance — e.g. "Erro
 `sl-error-handling`, `sl-domain`. The `description` is what makes the skill
 auto-load by relevance, so make it precise.
 
-## Step 5 — Initialize state
-Create/update `${CLAUDE_PROJECT_DIR}/.skill-loop/config` (key=value, one per
-line). Include at least:
+## Step 5 — Initialize state (personal, in your HOME — never the repo)
+skill-loop keeps everything personal. Ensure `${HOME}/.skill-loop/config` has the
+personal settings (the model keys from Step 0 plus the promotion threshold):
 ```
-stack=<short summary, e.g. "ts-node, jest, eslint+prettier">
-format_cmd=<one-file formatter command with {file}, or omit if none>
-lint_cmd=<repo-wide lint command, optional>
-test_cmd=<repo test command, optional>
 promote_min=2
 ```
 Ensure the staging files exist (touch is fine):
-`.skill-loop/candidates.jsonl`, `.skill-loop/candidates.md`.
-Do NOT write any skills into the plugin directory — only into the project's
-`.claude/skills/`.
+`${HOME}/.skill-loop/candidates.jsonl`, `${HOME}/.skill-loop/candidates.md`.
+Write skills ONLY to `${HOME}/.claude/skills/` (personal, global — they apply
+across all your projects). Never write skills into the repo or the plugin folder.
 
 ## Step 6 — Report back
 Show the user:

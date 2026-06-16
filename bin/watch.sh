@@ -6,9 +6,9 @@
 #   watch.sh [project-dir]      # live (default)
 #   SL_WATCH_ONCE=1 watch.sh …  # render current contents once, then exit (tests)
 
-PROJ="${1:-${CLAUDE_PROJECT_DIR:-$PWD}}"
-ACT="$PROJ/.skill-loop/activity.log"
-mkdir -p "$PROJ/.skill-loop" 2>/dev/null || true
+# Personal, global activity log — skill-loop never writes into a repo.
+ACT="${HOME}/.skill-loop/activity.log"
+mkdir -p "${HOME}/.skill-loop" 2>/dev/null || true
 [ -f "$ACT" ] || : >"$ACT"
 
 r=$'\033[0m'; dim=$'\033[2m'; bold=$'\033[1m'
@@ -28,7 +28,7 @@ color_for() {
 }
 
 printf '%s\n' "${bold}  skill-loop · live activity${r}"
-printf '%s\n' "${dim}  project: $PROJ${r}"
+printf '%s\n' "${dim}  ${HOME}/.skill-loop/activity.log (personal · never in a repo)${r}"
 printf '%s\n' "${dim}  $(basename "$ACT") — corrections, new patterns, approvals, failures, reflections${r}"
 printf '%s\n\n' "${dim}  ──────────────────────────────────────────────────────────────${r}"
 
