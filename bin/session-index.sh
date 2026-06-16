@@ -25,7 +25,12 @@ emit_ctx() {
 names=""; n=0
 if [ -f "$SKILL_FILE" ]; then
   n=1
-  names="$(grep -E '^## ' "$SKILL_FILE" 2>/dev/null | sed 's/^##[[:space:]]*//' | tr '\n' ',' | sed 's/,$//; s/,/, /g' | cut -c1-120)"
+  for f in "$SKILL_DIR"/*.md; do
+    [ -f "$f" ] || continue
+    b="$(basename "$f" .md)"; [ "$b" = "SKILL" ] && continue
+    names="$names$b, "
+  done
+  names="$(printf '%s' "${names%, }" | cut -c1-120)"
 fi
 
 # This project not bootstrapped yet? (per-project: each repo gets its own skill)

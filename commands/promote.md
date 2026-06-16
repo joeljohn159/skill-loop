@@ -41,16 +41,18 @@ For each selected candidate:
   should own it, instead add it to the relevant config (and say so), and do NOT
   make it a skill.
 
-## Step 3 — Merge into this project's single skill file
-This project has ONE skill file, `<SKILL_FILE>`, with a `## ` section per concern.
-- If it doesn't exist, create it with frontmatter `name: <SKILL_NAME>`, a precise
-  `description`, and `paths: <SKILL_PATHS>`.
-- For each candidate, find or create the matching `## <Concern>` section (Naming,
-  Layering, Testing, Error handling, Domain) and append the rule plus its
-  `**Verify:**` line. Never clobber existing sections; de-duplicate if the rule is
-  already present in spirit.
-- Keep it small. If a section grows past ~8 rules, tighten or drop the weakest, or
-  drop the weakest rules. Tokens here are paid on every relevant session.
+## Step 3 — Merge into this project's skill (router + per-concern files)
+This project's skill lives in `<SKILL_DIR>`: a router `SKILL.md` plus one
+supporting file per concern (`<concern>.md`).
+- If `<SKILL_FILE>` doesn't exist, create it (frontmatter `name: <SKILL_NAME>`, a
+  precise `description`, `paths: <SKILL_PATHS>`) with an index linking the concern
+  files.
+- For each candidate, append its rule + `**Verify:**` line to the matching
+  `<SKILL_DIR>/<concern>.md` (`naming.md`, `layering.md`, `testing.md`,
+  `error-handling.md`, `domain.md`). If it's a new concern, create the file and add
+  it to the router's index. Never clobber existing rules; de-duplicate in spirit.
+- Keep each concern file small. If one grows past ~8 rules, tighten or drop the
+  weakest. The router is paid every relevant session; concern files load on demand.
 
 ## Step 4 — Prune
 - Remove stale or low-value entries from skills: rules contradicted by the new
@@ -62,8 +64,8 @@ This project has ONE skill file, `<SKILL_FILE>`, with a `## ` section per concer
 ## Step 5 — Keep it revertable (personal, no repo commits)
 These skills are personal and live in `${HOME}/.claude/skills/`, outside any repo,
 so there is NO git commit and nothing is ever pushed. Keep changes revertable:
-- Before editing `<SKILL_FILE>`, copy it to
-  `<STATE_DIR>/skill-history/<SKILL_NAME>.$(date +%s).md`.
+- Before editing, snapshot the whole skill folder:
+  `cp -R "<SKILL_DIR>" "<STATE_DIR>/skill-history/<SKILL_NAME>.$(date +%s)"`.
 - To undo a promotion later, restore that backup or delete the rule/skill file.
 
 ## Step 6 — Concurrency note

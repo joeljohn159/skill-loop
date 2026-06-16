@@ -32,6 +32,7 @@ keeps them current automatically while staying near-zero tokens per session.
   and a backup is kept so every change is revertable.
 
 Everything is personal and per-project, in your HOME — never the repo: one skill
-at `~/.claude/skills/sl-<project>/SKILL.md` (a section per concern, scoped with
-`paths:`), state in `~/.skill-loop/projects/<project>/`. Set `scope=global` in
-`~/.skill-loop/config` to share one skill across all projects.
+folder per project at `~/.claude/skills/sl-<project>/` (a `SKILL.md` router plus a
+file per concern that loads on demand, scoped with `paths:`), state in
+`~/.skill-loop/projects/<project>/`. Set `scope=global` in `~/.skill-loop/config`
+to share one skill across all projects.

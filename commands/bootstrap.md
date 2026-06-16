@@ -81,15 +81,17 @@ For every convention you found, classify it:
 When in doubt, prefer FEWER, higher-signal rules. Bloat is paid for in tokens
 on every future session.
 
-## Step 4 — Write ONE skill for this project (judgment rules only)
+## Step 4 — Write this project's skill (a router + one file per concern)
 First resolve where it goes (personal, per-project, never in the repo):
 ```bash
 "${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILL_NAME, SKILL_DIR, SKILL_FILE, SKILL_PATHS
 ```
-Write a SINGLE file at `<SKILL_FILE>` holding all of this project's conventions,
-one `## ` section per concern. This keeps `~/.claude/skills` tidy — one folder per
-project, not one per concern. Use this shape:
+Built for large codebases: ONE folder per project (`<SKILL_DIR>`) containing a
+small `SKILL.md` that ROUTES to one supporting file per concern. The router's
+description auto-loads; each concern file loads on demand only when relevant, so
+the always-on cost stays tiny even as the skill grows.
 
+**(1) Write the router** `<SKILL_FILE>`:
 ```markdown
 ---
 name: <SKILL_NAME>
@@ -99,18 +101,25 @@ paths: <SKILL_PATHS>
 
 # <project> conventions
 
-## Naming
-- <imperative rule>
-**Verify:** `<command>`
-
-## Error handling
-- <imperative rule>
-**Verify:** `<command>`
+Read the file for the area you're touching:
+- **Naming** — `naming.md`
+- **Layering** — `layering.md`
+- **Error handling** — `error-handling.md`
 ```
+List only the concerns you actually write a file for.
 
-Include only the sections (Naming, Layering, Testing, Error handling, Domain) that
-have a real, verifiable rule. `paths` scopes the whole skill to THIS repo so it
-never bleeds into your other projects.
+**(2) Write one supporting file per concern** at `<SKILL_DIR>/<concern>.md`
+(`naming.md`, `layering.md`, `testing.md`, `error-handling.md`, `domain.md`):
+```markdown
+# Error handling
+
+- <imperative rule>
+- <imperative rule>
+
+**Verify:** `<command that checks compliance>`
+```
+Only create files for concerns with a real, verifiable rule. `paths` scopes the
+whole skill to THIS repo so it never bleeds into your other projects.
 
 ## Step 5 — Initialize state (personal & per-project, in your HOME)
 Personal prefs (the model keys from Step 0 + the promotion threshold) live in the

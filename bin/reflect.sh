@@ -129,8 +129,14 @@ sl_log "reflecting over $NSIG signal(s)"
 
 # Existing rules (descriptions only) so Haiku dedups instead of re-proposing.
 EXISTING_RULES=""
-if [ -f "$SKILL_FILE" ]; then
-  EXISTING_RULES="$(grep -E '^- ' "$SKILL_FILE" 2>/dev/null | cut -c1-160 | head -60)"
+if [ -d "$SKILL_DIR" ]; then
+  # rules live in the per-concern files; skip the router (SKILL.md) so its index
+  # links aren't mistaken for rules.
+  EXISTING_RULES="$(for f in "$SKILL_DIR"/*.md; do
+      [ -f "$f" ] || continue
+      [ "$(basename "$f")" = "SKILL.md" ] && continue
+      grep -hE '^- ' "$f" 2>/dev/null
+    done | cut -c1-160 | head -80)"
 fi
 EXISTING_CANDS=""
 [ -f "$CANDIDATES_JSONL" ] && EXISTING_CANDS="$("$SL_JQ" -r '"- " + .key + ": " + .rule' "$CANDIDATES_JSONL" 2>/dev/null | head -80)"
