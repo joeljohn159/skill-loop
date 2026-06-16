@@ -21,21 +21,16 @@ emit_ctx() {
   fi
 }
 
-# Collect skill-loop-managed skills (sl-*).
+# This project's conventions live in ONE skill file, with a section per concern.
 names=""; n=0
-if [ -d "$SKILLS_DIR" ]; then
-  for d in "$SKILLS_DIR/${SL_SKILL_PREFIX}"*/; do
-    [ -f "$d/SKILL.md" ] || continue
-    nm="$(basename "$d")"; n=$((n + 1))
-    [ "$n" -le 12 ] && names="$names${nm#${SL_SKILL_PREFIX}}, "
-  done
+if [ -f "$SKILL_FILE" ]; then
+  n=1
+  names="$(grep -E '^## ' "$SKILL_FILE" 2>/dev/null | sed 's/^##[[:space:]]*//' | tr '\n' ',' | sed 's/,$//; s/,/, /g' | cut -c1-120)"
 fi
-names="${names%, }"
-[ "$n" -gt 12 ] && names="$names (+$((n - 12)) more)"
 
-# This project not bootstrapped yet? (per-project: each repo gets its own skills)
+# This project not bootstrapped yet? (per-project: each repo gets its own skill)
 if [ "$n" -eq 0 ]; then
-  emit_ctx "skill-loop is installed but this project has no convention skills yet. Run /skill-loop:bootstrap once to crawl this codebase and generate its judgment-level skills (kept personal to you, never pushed)."
+  emit_ctx "skill-loop is installed but this project has no convention skill yet. Run /skill-loop:bootstrap once to crawl this codebase and generate it (kept personal to you, never pushed)."
   exit 0
 fi
 
@@ -46,9 +41,9 @@ if [ -f "$CANDIDATES_JSONL" ] && [ -n "$SL_JQ" ]; then
   ready="$("$SL_JQ" -s -r "[.[]|select((.recurrence // 1) >= $PROMOTE_MIN)]|length" "$CANDIDATES_JSONL" 2>/dev/null)"; ready="${ready:-0}"
 fi
 
-ctx="skill-loop active ($n convention skill(s); they auto-load by relevance)."
+ctx="skill-loop active for this project (conventions skill auto-loads by relevance)."
 prof="$(sl_cfg profile)"; [ -n "$prof" ] && ctx="$ctx Models: $prof."
-[ -n "$names" ] && ctx="$ctx Skills: $names"
+[ -n "$names" ] && ctx="$ctx Covers: $names."
 if [ "${ready:-0}" -gt 0 ]; then
   ctx="$ctx  ⚑ $ready candidate rule(s) ready to promote — run /skill-loop:promote."
 elif [ "${total:-0}" -gt 0 ]; then

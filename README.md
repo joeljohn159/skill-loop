@@ -8,7 +8,7 @@ patterns, clean merges, and failures.
 Learned skills are personal to you and scoped per project. Nothing is committed
 to or pushed into your repositories, and most sessions cost no additional tokens.
 
-![version](https://img.shields.io/badge/version-0.3.0-blue)
+![version](https://img.shields.io/badge/version-0.4.0-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
 ## Installation
@@ -89,8 +89,9 @@ is the main cost lever.
 Everything skill-loop learns is personal, per-project, and kept in your home
 directory. Nothing is written into a repository.
 
-- Skills: `~/.claude/skills/sl-<project>-*`, scoped with a `paths:` rule so they
-  activate only inside their own project.
+- Skill: `~/.claude/skills/sl-<project>/SKILL.md` — one folder per project, with a
+  section per concern, scoped with a `paths:` rule so it activates only inside that
+  project.
 - Per-project state: `~/.skill-loop/projects/<project>/` (signals, candidates,
   snapshots, activity log).
 - Global preferences: `~/.skill-loop/config` (model choices, thresholds, scope).

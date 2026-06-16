@@ -31,7 +31,7 @@ keeps them current automatically while staying near-zero tokens per session.
 - Candidates are staging only — skills change only on promote (never automatic),
   and a backup is kept so every change is revertable.
 
-Everything is personal and per-project, in your HOME — never the repo: skills in
-`~/.claude/skills/sl-<project>-*` (scoped with `paths:`), state in
-`~/.skill-loop/projects/<project>/`. Set `scope=global` in `~/.skill-loop/config`
-to share one set across all projects.
+Everything is personal and per-project, in your HOME — never the repo: one skill
+at `~/.claude/skills/sl-<project>/SKILL.md` (a section per concern, scoped with
+`paths:`), state in `~/.skill-loop/projects/<project>/`. Set `scope=global` in
+`~/.skill-loop/config` to share one skill across all projects.

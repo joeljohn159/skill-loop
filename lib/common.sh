@@ -46,13 +46,18 @@ SL_SCOPE="$(grep -E '^scope=' "$CONFIG" 2>/dev/null | head -1 | cut -d= -f2-)"
 SL_SCOPE="${SL_SCOPE:-project}"
 if [ "$SL_SCOPE" = "global" ]; then
   STATE_DIR="$SL_ROOT"
-  SL_SKILL_PREFIX="sl-"
+  SKILL_NAME="sl-conventions"                # one shared skill across all projects
   SL_SKILL_PATHS=""                          # no path scoping — applies everywhere
 else
   STATE_DIR="$SL_ROOT/projects/$PROJECT_KEY" # per-project state, all under HOME
-  SL_SKILL_PREFIX="sl-${PROJECT_KEY}-"
-  SL_SKILL_PATHS="${PROJECT_DIR}/**"         # skills activate only inside this repo
+  SKILL_NAME="sl-${PROJECT_KEY}"             # ONE skill folder per project
+  SL_SKILL_PATHS="${PROJECT_DIR}/**"         # activates only inside this repo
 fi
+# A project's conventions live in ONE skill folder, with a section per concern,
+# so ~/.claude/skills stays tidy (one entry per project, not one per concern).
+SKILL_DIR="$SKILLS_DIR/$SKILL_NAME"
+SKILL_FILE="$SKILL_DIR/SKILL.md"
+SL_SKILL_PREFIX="$SKILL_NAME"                # back-compat alias for globs
 
 QUEUE="$STATE_DIR/queue.jsonl"               # raw captured signals (append-only)
 CANDIDATES="$STATE_DIR/candidates.md"        # staged rules awaiting promotion

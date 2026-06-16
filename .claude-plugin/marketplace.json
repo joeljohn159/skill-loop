@@ -11,7 +11,7 @@
       "name": "skill-loop",
       "source": "./",
       "description": "Bootstraps coding skills from an existing repo, then improves them automatically as you work.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "productivity",
       "keywords": ["skills", "self-improving", "conventions", "hooks"],
       "license": "MIT"

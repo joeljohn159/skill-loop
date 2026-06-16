@@ -8,9 +8,11 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 . "$SCRIPT_DIR/../lib/common.sh" 2>/dev/null || exit 0
 sl_ensure_dirs
-printf 'SCOPE=%s\n'        "$SL_SCOPE"
-printf 'PROJECT_KEY=%s\n'  "$PROJECT_KEY"
-printf 'STATE_DIR=%s\n'    "$STATE_DIR"
-printf 'SKILLS_DIR=%s\n'   "$SKILLS_DIR"
-printf 'SKILL_PREFIX=%s\n' "$SL_SKILL_PREFIX"
-printf 'SKILL_PATHS=%s\n'  "$SL_SKILL_PATHS"
+printf 'SCOPE=%s\n'       "$SL_SCOPE"
+printf 'PROJECT_KEY=%s\n' "$PROJECT_KEY"
+printf 'STATE_DIR=%s\n'   "$STATE_DIR"
+printf 'SKILLS_DIR=%s\n'  "$SKILLS_DIR"
+printf 'SKILL_NAME=%s\n'  "$SKILL_NAME"
+printf 'SKILL_DIR=%s\n'   "$SKILL_DIR"
+printf 'SKILL_FILE=%s\n'  "$SKILL_FILE"
+printf 'SKILL_PATHS=%s\n' "$SL_SKILL_PATHS"

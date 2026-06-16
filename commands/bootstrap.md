@@ -81,34 +81,36 @@ For every convention you found, classify it:
 When in doubt, prefer FEWER, higher-signal rules. Bloat is paid for in tokens
 on every future session.
 
-## Step 4 — Write tiny skills (judgment rules only) — personal & per-project
-First resolve where this project's skills go (kept personal to you, never in the
-repo, and scoped so they don't bleed into your other projects):
+## Step 4 — Write ONE skill for this project (judgment rules only)
+First resolve where it goes (personal, per-project, never in the repo):
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILLS_DIR, SKILL_PREFIX, SKILL_PATHS
+"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILL_NAME, SKILL_DIR, SKILL_FILE, SKILL_PATHS
 ```
-For each judgment concern with ≥1 real rule, write
-`<SKILLS_DIR>/<SKILL_PREFIX><concern>/SKILL.md` using this exact shape (body =
-a few dozen tokens of distilled rules):
+Write a SINGLE file at `<SKILL_FILE>` holding all of this project's conventions,
+one `## ` section per concern. This keeps `~/.claude/skills` tidy — one folder per
+project, not one per concern. Use this shape:
 
 ```markdown
 ---
-name: <SKILL_PREFIX><concern>
-description: <one precise line so it auto-loads on relevance — e.g. "Error-handling for this repo: when to return errors vs throw.">
+name: <SKILL_NAME>
+description: <one precise line covering this repo's conventions, so it auto-loads when working here>
 paths: <SKILL_PATHS>
 ---
 
-# <Concern> conventions
+# <project> conventions
 
-- <imperative rule 1>
-- <imperative rule 2>
+## Naming
+- <imperative rule>
+**Verify:** `<command>`
 
-**Verify:** `<command that checks compliance>`
+## Error handling
+- <imperative rule>
+**Verify:** `<command>`
 ```
 
-`<concern>` examples: `naming`, `layering`, `testing`, `error-handling`, `domain`.
-The `description` makes it auto-load by relevance; `paths` scopes it to THIS repo
-so it never bleeds into your other projects.
+Include only the sections (Naming, Layering, Testing, Error handling, Domain) that
+have a real, verifiable rule. `paths` scopes the whole skill to THIS repo so it
+never bleeds into your other projects.
 
 ## Step 5 — Initialize state (personal & per-project, in your HOME)
 Personal prefs (the model keys from Step 0 + the promotion threshold) live in the

@@ -13,7 +13,7 @@ behavior, so each must be clean, generalized, and individually revertable.
 Everything is personal & per-project — never the repo, never pushed. First resolve
 this project's locations and use the values literally below:
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILLS_DIR, SKILL_PREFIX, SKILL_PATHS
+"${CLAUDE_PLUGIN_ROOT}/bin/sl-where.sh"   # prints STATE_DIR, SKILL_NAME, SKILL_FILE, SKILL_PATHS
 ```
 
 ## Step 0 — Honor the configured model
@@ -41,15 +41,15 @@ For each selected candidate:
   should own it, instead add it to the relevant config (and say so), and do NOT
   make it a skill.
 
-## Step 3 — Write into the correct SKILL.md
-Map each candidate's `concern` to `<SKILLS_DIR>/<SKILL_PREFIX><concern>/SKILL.md`,
-and include `paths: <SKILL_PATHS>` in the frontmatter so it stays scoped to this repo.
-- If the skill exists: **merge** — append the new rule under the rules list and
-  keep/append its verify command. Never clobber existing rules; de-duplicate if
-  the rule is already present in spirit.
-- If it doesn't exist: create it using the same tiny template bootstrap uses
-  (frontmatter `name` + precise `description`, a short rules list, `**Verify:**`).
-- Keep each skill small. If a skill grows past ~8 rules, split by sub-concern or
+## Step 3 — Merge into this project's single skill file
+This project has ONE skill file, `<SKILL_FILE>`, with a `## ` section per concern.
+- If it doesn't exist, create it with frontmatter `name: <SKILL_NAME>`, a precise
+  `description`, and `paths: <SKILL_PATHS>`.
+- For each candidate, find or create the matching `## <Concern>` section (Naming,
+  Layering, Testing, Error handling, Domain) and append the rule plus its
+  `**Verify:**` line. Never clobber existing sections; de-duplicate if the rule is
+  already present in spirit.
+- Keep it small. If a section grows past ~8 rules, tighten or drop the weakest, or
   drop the weakest rules. Tokens here are paid on every relevant session.
 
 ## Step 4 — Prune
@@ -62,8 +62,8 @@ and include `paths: <SKILL_PATHS>` in the frontmatter so it stays scoped to this
 ## Step 5 — Keep it revertable (personal, no repo commits)
 These skills are personal and live in `${HOME}/.claude/skills/`, outside any repo,
 so there is NO git commit and nothing is ever pushed. Keep changes revertable:
-- Before editing an existing `<SKILL_PREFIX><concern>/SKILL.md`, copy it to
-  `<STATE_DIR>/skill-history/<SKILL_PREFIX><concern>.$(date +%s).md`.
+- Before editing `<SKILL_FILE>`, copy it to
+  `<STATE_DIR>/skill-history/<SKILL_NAME>.$(date +%s).md`.
 - To undo a promotion later, restore that backup or delete the rule/skill file.
 
 ## Step 6 — Concurrency note
